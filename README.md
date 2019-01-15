@@ -1,4 +1,7 @@
+Make sure you have [NodeJS](https://nodejs.org/en/) on your machine!
+
 node v10.15.0
+
 npm v6.4.1
 
 There are a couple ways to kick this puppy off.
