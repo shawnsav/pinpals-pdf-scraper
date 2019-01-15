@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.loginQuestions = exports.environmentCredentials = exports.pinpalsUrl = exports.loginUrl = exports.baseUrl = exports.unwantedUrls = void 0;
+exports.downloadQuestions = exports.loginQuestions = exports.environmentCredentials = exports.pinpalsUrl = exports.loginUrl = exports.baseUrl = exports.unwantedUrls = void 0;
 var unwantedUrls = ['https://www.colorado-pinball.com/what-are-pinpals/', '#Number', '#A', '#B', '#C', '#D', '#E', '#F', '#G', '#H', '#I', '#J', '#K', '#L', '#M', '#N', '#O', '#P', '#Q', '#R', '#S', '#T', '#U', '#V', '#W', '#X', '#Y', '#Z', '#Top'];
 exports.unwantedUrls = unwantedUrls;
 var login = 'login';
@@ -30,3 +30,9 @@ var loginQuestions = [{
   type: 'password'
 }];
 exports.loginQuestions = loginQuestions;
+var downloadQuestions = [{
+  name: 'path',
+  message: 'Path for downloads (default is ./pinpals-pdfs/):',
+  type: 'input'
+}];
+exports.downloadQuestions = downloadQuestions;

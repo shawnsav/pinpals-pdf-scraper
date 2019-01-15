@@ -55,3 +55,9 @@ export const loginQuestions = [
     type: 'password',
   }
 ];
+
+export const downloadQuestions = [{
+  name: 'path',
+  message: 'Path for downloads (default is ./pinpals-pdfs/):',
+  type: 'input',
+}];

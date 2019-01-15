@@ -5,6 +5,8 @@ require("@babel/polyfill");
 
 var _inquirer = _interopRequireDefault(require("inquirer"));
 
+var _cliProgress = _interopRequireDefault(require("cli-progress"));
+
 var _login = _interopRequireDefault(require("./services/login"));
 
 var _getMachinePageUrls = _interopRequireDefault(require("./services/getMachinePageUrls"));
@@ -33,7 +35,7 @@ function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee() {
-    var credentials, input, cookieJar, machineUrls, machineUrlPromises, fileUrls, fileDownloadPromises, successfulFiles;
+    var credentials, input, cookieJar, machineUrls, progressBar, machineUrlPromises, fileUrls, downloadPath, fileDownloadPromises, successfulFiles;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -57,51 +59,61 @@ function () {
             credentials = _objectSpread({}, credentials, input);
 
           case 6:
-            console.log('Logging in!');
+            console.log('\nLogging in!');
             _context.next = 9;
             return (0, _login.default)(credentials);
 
           case 9:
             cookieJar = _context.sent;
-            console.log('Successfully logged in!');
-            console.log('Fetching individual machine page urls...');
+            console.log('------------ Successfully logged in!');
+            console.log('\nFetching individual machine page urls...');
             _context.next = 14;
             return (0, _getMachinePageUrls.default)();
 
           case 14:
             machineUrls = _context.sent;
-            console.log('Successfully retrieved machine page urls:');
-            console.log(machineUrls); // individual pinpals pages need cookie
+            console.log("\nSuccessfully retrieved ".concat(machineUrls.length, " machine page urls"));
+            progressBar = new _cliProgress.default.Bar({}, _cliProgress.default.Presets.shades_classic); // individual pinpals pages need cookie
 
             machineUrlPromises = machineUrls.map(function (url) {
               return function () {
+                progressBar.increment();
                 return (0, _getPdfFileUrl.default)(url, cookieJar);
               };
             });
-            console.log('Fetching individual .pdf urls...');
-            _context.next = 21;
+            console.log('\nFetching individual .pdf urls.');
+            console.log('This may take a few minutes.');
+            progressBar.start(machineUrlPromises.length, 0);
+            _context.next = 23;
             return (0, _sequencePromises.default)(machineUrlPromises);
 
-          case 21:
+          case 23:
             fileUrls = _context.sent;
-            console.log('Successfully retrieved machine page urls:');
+            console.log('\nSuccessfully retrieved machine page urls:');
             console.log(fileUrls);
-            console.log('Starting downloads...');
-            fileDownloadPromises = fileUrls.map(function (url) {
-              return function () {
-                return (0, _downloadPdf.default)(url);
-              };
-            });
             _context.next = 28;
-            return (0, _sequencePromises.default)(fileDownloadPromises);
+            return _inquirer.default.prompt(_constants.downloadQuestions).then(function (answers) {
+              return answers.path;
+            });
 
           case 28:
+            downloadPath = _context.sent;
+            console.log('\nStarting downloads...');
+            fileDownloadPromises = fileUrls.map(function (url) {
+              return function () {
+                return (0, _downloadPdf.default)(url, downloadPath);
+              };
+            });
+            _context.next = 33;
+            return (0, _sequencePromises.default)(fileDownloadPromises);
+
+          case 33:
             successfulFiles = _context.sent;
-            console.log('Successfully downloaded:', successfulFiles);
-            console.log('Done!');
+            console.log("\nSuccessfully downloaded ".concat(successfulFiles.length, " .pdfs!"), successfulFiles);
+            console.log('\nDone!');
             process.exit(0);
 
-          case 32:
+          case 37:
           case "end":
             return _context.stop();
         }
@@ -114,5 +126,5 @@ function () {
   };
 }();
 
-console.log('Starting!');
+console.log('\nStarting!');
 main();

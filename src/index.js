@@ -2,6 +2,7 @@
 
 import '@babel/polyfill';
 import inquirer from 'inquirer';
+import cliProgress from 'cli-progress';
 
 import login from './services/login';
 import getMachinePageUrls from './services/getMachinePageUrls';
@@ -13,6 +14,7 @@ import sequencePromises from './utils/sequencePromises';
 import {
   environmentCredentials,
   loginQuestions,
+  downloadQuestions,
 } from './constants';
 
 const main = async () => {
@@ -22,31 +24,37 @@ const main = async () => {
     credentials = { ...credentials, ...input };
   }
 
-  console.log('Logging in!');
+  console.log('\nLogging in!');
   const cookieJar = await login(credentials);
-  console.log('Successfully logged in!');
+  console.log('------------ Successfully logged in!');
 
-  console.log('Fetching individual machine page urls...');
+  console.log('\nFetching individual machine page urls...');
   const machineUrls = await getMachinePageUrls();
-  console.log('Successfully retrieved machine page urls:')
-  console.log(machineUrls);
+  console.log(`\nSuccessfully retrieved ${machineUrls.length} machine page urls`)
 
+  const progressBar = new cliProgress.Bar({}, cliProgress.Presets.shades_classic);
   // individual pinpals pages need cookie
-  const machineUrlPromises = machineUrls.map(url => () => getPdfFileUrl(url, cookieJar));
+  const machineUrlPromises = machineUrls.map(url => () => {
+    progressBar.increment();
+    return getPdfFileUrl(url, cookieJar);
+  });
 
-  console.log('Fetching individual .pdf urls...');
+  console.log('\nFetching individual .pdf urls.');
+  console.log('This may take a few minutes.')
+  progressBar.start(machineUrlPromises.length, 0);
   const fileUrls = await sequencePromises(machineUrlPromises);
-  console.log('Successfully retrieved machine page urls:');
+  console.log('\nSuccessfully retrieved machine page urls:');
   console.log(fileUrls);
 
-  console.log('Starting downloads...');
-  const fileDownloadPromises = fileUrls.map(url => () => downloadPdf(url));
+  const downloadPath = await inquirer.prompt(downloadQuestions).then(answers => answers.path);
+  console.log('\nStarting downloads...');
+  const fileDownloadPromises = fileUrls.map(url => () => downloadPdf(url, downloadPath));
   const successfulFiles = await sequencePromises(fileDownloadPromises);
-  console.log('Successfully downloaded:', successfulFiles);
+  console.log(`\nSuccessfully downloaded ${successfulFiles.length} .pdfs!`, successfulFiles);
 
-  console.log('Done!');
+  console.log('\nDone!');
   process.exit(0);
 };
 
-console.log('Starting!');
+console.log('\nStarting!');
 main();
