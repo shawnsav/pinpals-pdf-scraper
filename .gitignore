@@ -1,0 +1,5 @@
+node_modules
+npm-debug.log
+pinpals-pdfs
+.env
+.DS_Store
