@@ -19,3 +19,5 @@ Or, to generate and run a new production build, navigate to the directory from t
 2. `$ npm run start-dist`
 
 Other script commands can be found in the `package.json`.
+
+You can also add your own `.env` file in the root of the directory with both `USERNAME=<pinpals username>` & `PASSWORD=<pw>`.
