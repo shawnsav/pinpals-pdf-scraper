@@ -33,7 +33,7 @@ const main = async () => {
   console.log(`\nSuccessfully retrieved ${machineUrls.length} machine page urls`)
 
   const progressBar = new cliProgress.Bar({}, cliProgress.Presets.shades_classic);
-  // individual pinpals pages need cookie
+  // individual pinpals pages need a cookie
   const machineUrlPromises = machineUrls.map(url => () => {
     progressBar.increment();
     return getPdfFileUrl(url, cookieJar);
